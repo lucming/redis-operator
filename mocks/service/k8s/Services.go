@@ -26,6 +26,10 @@ type Services struct {
 	mock.Mock
 }
 
+func (_m *Services) AddOrUpdatePodLabels(namespace, name string, lables map[string]string) error {
+	return nil
+}
+
 // CreateConfigMap provides a mock function with given fields: namespace, configMap
 func (_m *Services) CreateConfigMap(namespace string, configMap *v1.ConfigMap) error {
 	ret := _m.Called(namespace, configMap)

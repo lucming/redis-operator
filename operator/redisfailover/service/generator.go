@@ -103,6 +103,70 @@ func generateRedisService(rf *redisfailoverv1.RedisFailover, labels map[string]s
 	}
 }
 
+func generateMasterService(rf *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) *corev1.Service {
+	name := GetRedisName(rf)
+	namespace := rf.Namespace
+	selectorLabels := generateSelectorLabels(redisRoleName, rf.Name)
+	selectorLabels["role"] = "master"
+	labels = util.MergeLabels(labels, selectorLabels)
+	masterTargetPort := intstr.FromInt(6379)
+
+	return &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:            name + "-master",
+			Namespace:       namespace,
+			Labels:          labels,
+			OwnerReferences: ownerRefs,
+			Annotations:     rf.Spec.Redis.PodAnnotations,
+		},
+		Spec: corev1.ServiceSpec{
+			Type:      corev1.ServiceTypeClusterIP,
+			ClusterIP: corev1.ClusterIPNone,
+			Ports: []corev1.ServicePort{
+				{
+					Name:       "master",
+					Port:       6379,
+					TargetPort: masterTargetPort,
+					Protocol:   "TCP",
+				},
+			},
+			Selector: selectorLabels,
+		},
+	}
+}
+
+func generateSlaveService(rf *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) *corev1.Service {
+	name := GetRedisName(rf)
+	namespace := rf.Namespace
+	selectorLabels := generateSelectorLabels(redisRoleName, rf.Name)
+	selectorLabels["role"] = "slave"
+	labels = util.MergeLabels(labels, selectorLabels)
+	masterTargetPort := intstr.FromInt(6379)
+
+	return &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:            name + "-slave",
+			Namespace:       namespace,
+			Labels:          labels,
+			OwnerReferences: ownerRefs,
+			Annotations:     rf.Spec.Redis.PodAnnotations,
+		},
+		Spec: corev1.ServiceSpec{
+			Type:      corev1.ServiceTypeClusterIP,
+			ClusterIP: corev1.ClusterIPNone,
+			Ports: []corev1.ServicePort{
+				{
+					Name:       "slave",
+					Port:       6379,
+					TargetPort: masterTargetPort,
+					Protocol:   "TCP",
+				},
+			},
+			Selector: selectorLabels,
+		},
+	}
+}
+
 func generateSentinelConfigMap(rf *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) *corev1.ConfigMap {
 	name := GetSentinelName(rf)
 	namespace := rf.Namespace

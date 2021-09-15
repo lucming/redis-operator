@@ -4,14 +4,14 @@ metadata:
   name: redisfailover
 spec:
   sentinel:
-    replicas: 1
+    replicas: 3
     resources:
       requests:
         cpu: 100m
       limits:
         memory: 100Mi
   redis:
-    replicas: 1
+    replicas: 3
     resources:
       requests:
         cpu: 100m

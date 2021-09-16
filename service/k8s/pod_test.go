@@ -2,16 +2,19 @@ package k8s_test
 
 import (
 	"errors"
-	"testing"
-
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	kubeerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	kube "k8s.io/client-go/kubernetes"
 	kubernetes "k8s.io/client-go/kubernetes/fake"
 	kubetesting "k8s.io/client-go/testing"
+	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/util/homedir"
+	"path/filepath"
+	"testing"
 
 	"github.com/spotahome/redis-operator/log"
 	"github.com/spotahome/redis-operator/service/k8s"
@@ -112,6 +115,49 @@ func TestPodServiceGetCreateOrUpdate(t *testing.T) {
 				assert.NoError(err)
 				// Check calls to kubernetes.
 				assert.Equal(test.expActions, mcli.Actions())
+			}
+		})
+	}
+}
+
+func TestPodService_AddOrUpdatePodLabels(t *testing.T) {
+	type args struct {
+		namespace string
+		name      string
+		lables    map[string]string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "add lable",
+			args: args{
+				namespace: "redis",
+				name:      "rfr-redisfailover-0",
+				lables:    map[string]string{"role": "slave"},
+			},
+			wantErr: false,
+		},
+		{
+			name: "update lable",
+			args: args{
+				namespace: "redis",
+				name:      "rfr-redisfailover-0",
+				lables:    map[string]string{"role": "master"},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			kubehome := filepath.Join(homedir.HomeDir(), ".kube", "config")
+			config, _ := clientcmd.BuildConfigFromFlags("", kubehome)
+			mcli, _ := kube.NewForConfig(config)
+			p := k8s.NewPodService(mcli, log.Dummy)
+			if err := p.AddOrUpdatePodLabels(tt.args.namespace, tt.args.name, tt.args.lables); (err != nil) != tt.wantErr {
+				t.Errorf("AddOrUpdatePodLabels() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

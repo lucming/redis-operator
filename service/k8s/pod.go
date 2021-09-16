@@ -17,6 +17,7 @@ type Pod interface {
 	CreateOrUpdatePod(namespace string, pod *corev1.Pod) error
 	DeletePod(namespace string, name string) error
 	ListPods(namespace string) (*corev1.PodList, error)
+	AddOrUpdatePodLabels(namespace, name string, lables map[string]string) error
 }
 
 // PodService is the pod service implementation using API calls to kubernetes.
@@ -82,4 +83,26 @@ func (p *PodService) DeletePod(namespace string, name string) error {
 
 func (p *PodService) ListPods(namespace string) (*corev1.PodList, error) {
 	return p.kubeClient.CoreV1().Pods(namespace).List(metav1.ListOptions{})
+}
+
+func (p *PodService) AddOrUpdatePodLabels(namespace, name string, lables map[string]string) error {
+	podInfo, err := p.GetPod(namespace, name)
+	if err != nil {
+		p.logger.Error("get pod error,err:", err)
+		return err
+	}
+
+	newLables := podInfo.Labels
+	for k, v := range lables {
+		newLables[k] = v
+	}
+
+	p.logger.Info("++++++++++before update:", podInfo.Labels, podInfo.Labels)
+	podInfo.Labels = newLables
+	err = p.UpdatePod(namespace, podInfo)
+	if err != nil {
+		p.logger.Error("++++++++++update pod error.err=", err)
+	}
+
+	return err
 }

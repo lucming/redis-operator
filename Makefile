@@ -155,3 +155,9 @@ endif
 update-codegen: docker-build
 	@echo ">> Generating code for Kubernetes CRD types..."
 	docker run --rm -v $(PWD):/go/src/github.com/spotahome/redis-operator/ $(REPOSITORY)-dev /bin/bash -c '$(UPDATE_CODEGEN_CMD)'
+
+restart-operator:
+	kind delete cluster --name test
+	kind create cluster --name test
+	kind load docker-image quay.io/spotahome/redis-operator:latest --name test
+	helm install redis-operator charts/redisoperator

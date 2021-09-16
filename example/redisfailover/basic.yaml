@@ -19,3 +19,4 @@ spec:
       limits:
         cpu: 400m
         memory: 500Mi
+  slaveExported: true

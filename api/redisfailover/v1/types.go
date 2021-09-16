@@ -22,6 +22,7 @@ type RedisFailoverSpec struct {
 	Auth           AuthSettings       `json:"auth,omitempty"`
 	LabelWhitelist []string           `json:"labelWhitelist,omitempty"`
 	BootstrapNode  *BootstrapSettings `json:"bootstrapNode,omitempty"`
+	SlaveExported  bool               `json:"slaveExported,omitempty"`
 }
 
 // RedisCommandRename defines the specification of a "rename-command" configuration option

@@ -92,16 +92,13 @@ func (p *PodService) AddOrUpdatePodLabels(namespace, name string, lables map[str
 		return err
 	}
 
-	newLables := podInfo.Labels
 	for k, v := range lables {
-		newLables[k] = v
+		podInfo.Labels[k] = v
 	}
 
-	p.logger.Info("++++++++++before update:", podInfo.Labels, podInfo.Labels)
-	podInfo.Labels = newLables
 	err = p.UpdatePod(namespace, podInfo)
 	if err != nil {
-		p.logger.Error("++++++++++update pod error.err=", err)
+		p.logger.Error("update pod error.err=", err)
 	}
 
 	return err

@@ -47,5 +47,9 @@ func (w *RedisFailoverHandler) Ensure(rf *redisfailoverv1.RedisFailover, labels 
 		}
 	}
 
+	if err := w.rfService.EnsureSlaveService(rf, labels, or); err != nil {
+		return err
+	}
+
 	return nil
 }

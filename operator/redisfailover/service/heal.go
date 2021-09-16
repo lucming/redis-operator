@@ -87,7 +87,9 @@ func (r *RedisFailoverHealer) SetOldestAsMaster(rf *redisfailoverv1.RedisFailove
 			}
 			patchLables["role"] = "slave"
 		}
-		r.k8sService.AddOrUpdatePodLabels(pod.Namespace, pod.Name, patchLables)
+		if err := r.k8sService.AddOrUpdatePodLabels(pod.Namespace, pod.Name, patchLables); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -119,7 +121,9 @@ func (r *RedisFailoverHealer) SetMasterOnAll(masterIP string, rf *redisfailoverv
 			}
 			patchLables["role"] = "slave"
 		}
-		r.k8sService.AddOrUpdatePodLabels(pod.Namespace, pod.Name, patchLables)
+		if err := r.k8sService.AddOrUpdatePodLabels(pod.Namespace, pod.Name, patchLables); err != nil {
+			return err
+		}
 	}
 	return nil
 }

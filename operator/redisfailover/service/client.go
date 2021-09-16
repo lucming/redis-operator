@@ -18,6 +18,8 @@ type RedisFailoverClient interface {
 	EnsureSentinelDeployment(rFailover *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error
 	EnsureRedisStatefulset(rFailover *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error
 	EnsureRedisService(rFailover *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error
+	EnsureMasterService(rFailover *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error
+	EnsureSlaveService(rFailover *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error
 	EnsureRedisShutdownConfigMap(rFailover *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error
 	EnsureRedisReadinessConfigMap(rFailover *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error
 	EnsureRedisConfigMap(rFailover *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error
@@ -49,6 +51,18 @@ func generateSelectorLabels(component, name string) map[string]string {
 // EnsureSentinelService makes sure the sentinel service exists
 func (r *RedisFailoverKubeClient) EnsureSentinelService(rf *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error {
 	svc := generateSentinelService(rf, labels, ownerRefs)
+	return r.K8SService.CreateIfNotExistsService(rf.Namespace, svc)
+}
+
+// EnsureMasterService makes sure the sentinel service exists
+func (r *RedisFailoverKubeClient) EnsureMasterService(rf *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error {
+	svc := generateMasterService(rf, labels, ownerRefs)
+	return r.K8SService.CreateIfNotExistsService(rf.Namespace, svc)
+}
+
+// EnsureSlaveService makes sure the sentinel service exists
+func (r *RedisFailoverKubeClient) EnsureSlaveService(rf *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error {
+	svc := generateSlaveService(rf, labels, ownerRefs)
 	return r.K8SService.CreateIfNotExistsService(rf.Namespace, svc)
 }
 

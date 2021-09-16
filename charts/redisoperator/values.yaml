@@ -1,5 +1,6 @@
 image: quay.io/spotahome/redis-operator
 tag: latest
+pullPolicy: IfNotPresent
 containerName: redisoperator
 podAnnotations: {}
 securityContext:

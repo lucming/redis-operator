@@ -2,19 +2,20 @@ package k8s_test
 
 import (
 	"errors"
+	kube "k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/util/homedir"
+	"path/filepath"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	kubeerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	kube "k8s.io/client-go/kubernetes"
 	kubernetes "k8s.io/client-go/kubernetes/fake"
 	kubetesting "k8s.io/client-go/testing"
-	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/util/homedir"
-	"path/filepath"
-	"testing"
 
 	"github.com/spotahome/redis-operator/log"
 	"github.com/spotahome/redis-operator/service/k8s"
@@ -135,7 +136,7 @@ func TestPodService_AddOrUpdatePodLabels(t *testing.T) {
 			name: "add lable",
 			args: args{
 				namespace: "redis",
-				name:      "rfr-redisfailover-0",
+				name:      "rfs-redisfailover-5ddcd47cdb-x24h2",
 				lables:    map[string]string{"role": "slave"},
 			},
 			wantErr: false,
@@ -144,7 +145,7 @@ func TestPodService_AddOrUpdatePodLabels(t *testing.T) {
 			name: "update lable",
 			args: args{
 				namespace: "redis",
-				name:      "rfr-redisfailover-0",
+				name:      "rfs-redisfailover-5ddcd47cdb-x24h2",
 				lables:    map[string]string{"role": "master"},
 			},
 			wantErr: false,

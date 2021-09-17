@@ -92,6 +92,10 @@ func (p *PodService) AddOrUpdatePodLabels(namespace, name string, lables map[str
 		return err
 	}
 
+	if podInfo.Labels == nil {
+		podInfo.Labels = make(map[string]string)
+	}
+
 	for k, v := range lables {
 		podInfo.Labels[k] = v
 	}

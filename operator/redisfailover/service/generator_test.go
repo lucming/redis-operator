@@ -1271,7 +1271,7 @@ func TestRedisService(t *testing.T) {
 			}).Return(nil)
 
 			client := rfservice.NewRedisFailoverKubeClient(ms, log.Dummy)
-			err := client.EnsureRedisService(rf, test.rfLabels, []metav1.OwnerReference{{Name: "testing"}})
+			err := client.EnsureMetricsService(rf, test.rfLabels, []metav1.OwnerReference{{Name: "testing"}})
 
 			assert.Equal(test.expectedService, generatedService)
 			assert.NoError(err)

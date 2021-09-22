@@ -17,6 +17,7 @@ type RedisFailoverClient interface {
 	EnsureSentinelConfigMap(rFailover *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error
 	EnsureSentinelDeployment(rFailover *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error
 	EnsureRedisStatefulset(rFailover *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error
+	EnsureMetricsService(rFailover *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error
 	EnsureRedisService(rFailover *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error
 	EnsureRedisShutdownConfigMap(rFailover *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error
 	EnsureRedisReadinessConfigMap(rFailover *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error
@@ -107,9 +108,22 @@ func (r *RedisFailoverKubeClient) EnsureRedisReadinessConfigMap(rf *redisfailove
 	return r.K8SService.CreateOrUpdateConfigMap(rf.Namespace, cm)
 }
 
-// EnsureRedisService makes sure the redis statefulset exists
-func (r *RedisFailoverKubeClient) EnsureRedisService(rf *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error {
+// EnsureMetricsService makes sure the redis metrics service exists
+func (r *RedisFailoverKubeClient) EnsureMetricsService(rf *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error {
 	svc := generateRedisService(rf, labels, ownerRefs)
+	return r.K8SService.CreateIfNotExistsService(rf.Namespace, svc)
+}
+
+// EnsureRedisService makes sure the redis service exists,excluding master and slave
+func (r *RedisFailoverKubeClient) EnsureRedisService(rf *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error {
+	//create service of master
+	svc := generateService(rf, labels, ownerRefs, masterRoleName)
+	if err := r.K8SService.CreateIfNotExistsService(rf.Namespace, svc); err != nil {
+		return err
+	}
+
+	//create service of slave
+	svc = generateService(rf, labels, ownerRefs, slaveRoleName)
 	return r.K8SService.CreateIfNotExistsService(rf.Namespace, svc)
 }
 

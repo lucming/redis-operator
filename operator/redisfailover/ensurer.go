@@ -6,11 +6,13 @@ import (
 	redisfailoverv1 "github.com/spotahome/redis-operator/api/redisfailover/v1"
 )
 
+type serviceRole = string
+
 const (
-	masterRoleName   = "master"
-	slaveRoleName    = "slave"
-	sentinelRoleName = "sentinel"
-	metricsRoleName  = "metrics"
+	masterRoleName   serviceRole = "master"
+	slaveRoleName    serviceRole = "slave"
+	sentinelRoleName serviceRole = "sentinel"
+	metricsRoleName  serviceRole = "metrics"
 )
 
 // Ensure is called to ensure all of the resources associated with a RedisFailover are created

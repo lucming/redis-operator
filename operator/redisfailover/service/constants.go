@@ -26,6 +26,7 @@ const (
 	masterRoleName         = "master"
 	slaveRoleName          = "slave"
 	sentinelRoleName       = "sentinel"
+	metricsRoleName        = "metrics"
 	sentinelConfigFileName = "sentinel.conf"
 	redisConfigFileName    = "redis.conf"
 	redisName              = "r"

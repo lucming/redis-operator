@@ -55,7 +55,7 @@ func generateSelectorLabelsByRole(name string, role string) map[string]string {
 
 // EnsureService makes sure the service exists
 func (r *RedisFailoverKubeClient) EnsureService(rf *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference, role string) error {
-	svc := generateServiceByRole(rf, labels, ownerRefs, role)
+	svc := generateService(rf, labels, ownerRefs, role)
 	return r.K8SService.CreateIfNotExistsService(rf.Namespace, svc)
 }
 
@@ -116,7 +116,7 @@ func (r *RedisFailoverKubeClient) EnsureRedisReadinessConfigMap(rf *redisfailove
 
 // EnsureRedisService makes sure the redis statefulset exists
 func (r *RedisFailoverKubeClient) EnsureRedisService(rf *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error {
-	svc := generateRedisService(rf, labels, ownerRefs)
+	svc := generateService(rf, labels, ownerRefs, metricsRoleName)
 	return r.K8SService.CreateIfNotExistsService(rf.Namespace, svc)
 }
 

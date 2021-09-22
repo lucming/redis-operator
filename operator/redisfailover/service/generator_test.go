@@ -1023,7 +1023,7 @@ func TestSentinelService(t *testing.T) {
 			}).Return(nil)
 
 			client := rfservice.NewRedisFailoverKubeClient(ms, log.Dummy)
-			err := client.EnsureSentinelService(rf, test.rfLabels, []metav1.OwnerReference{{Name: "testing"}})
+			err := client.EnsureService(rf, test.rfLabels, []metav1.OwnerReference{{Name: "testing"}}, "sentinel")
 
 			assert.Equal(test.expectedService, generatedService)
 			assert.NoError(err)

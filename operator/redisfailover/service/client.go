@@ -13,11 +13,10 @@ import (
 // RedisFailoverClient has the minimumm methods that a Redis failover controller needs to satisfy
 // in order to talk with K8s
 type RedisFailoverClient interface {
-	EnsureSentinelService(rFailover *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error
+	EnsureService(rFailover *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference, role string) error
 	EnsureSentinelConfigMap(rFailover *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error
 	EnsureSentinelDeployment(rFailover *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error
 	EnsureRedisStatefulset(rFailover *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error
-	EnsureRedisService(rFailover *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error
 	EnsureRedisShutdownConfigMap(rFailover *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error
 	EnsureRedisReadinessConfigMap(rFailover *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error
 	EnsureRedisConfigMap(rFailover *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error
@@ -46,9 +45,17 @@ func generateSelectorLabels(component, name string) map[string]string {
 	}
 }
 
-// EnsureSentinelService makes sure the sentinel service exists
-func (r *RedisFailoverKubeClient) EnsureSentinelService(rf *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error {
-	svc := generateSentinelService(rf, labels, ownerRefs)
+func generateSelectorLabelsByRole(name string, role string) map[string]string {
+	return map[string]string{
+		"app.kubernetes.io/name":    name,
+		"app.kubernetes.io/part-of": appLabel,
+		"role":                      role,
+	}
+}
+
+// EnsureService makes sure the service exists
+func (r *RedisFailoverKubeClient) EnsureService(rf *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference, role string) error {
+	svc := generateService(rf, labels, ownerRefs, role)
 	return r.K8SService.CreateIfNotExistsService(rf.Namespace, svc)
 }
 
@@ -109,7 +116,7 @@ func (r *RedisFailoverKubeClient) EnsureRedisReadinessConfigMap(rf *redisfailove
 
 // EnsureRedisService makes sure the redis statefulset exists
 func (r *RedisFailoverKubeClient) EnsureRedisService(rf *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) error {
-	svc := generateRedisService(rf, labels, ownerRefs)
+	svc := generateService(rf, labels, ownerRefs, metricsRoleName)
 	return r.K8SService.CreateIfNotExistsService(rf.Namespace, svc)
 }
 

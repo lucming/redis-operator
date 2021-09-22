@@ -37,68 +37,52 @@ rename-command "{{.From}}" "{{.To}}"
 	graceTime = 30
 )
 
-func generateSentinelService(rf *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) *corev1.Service {
-	name := GetSentinelName(rf)
-	namespace := rf.Namespace
-
-	sentinelTargetPort := intstr.FromInt(26379)
-	selectorLabels := generateSelectorLabels(sentinelRoleName, rf.Name)
-	labels = util.MergeLabels(labels, selectorLabels)
-
-	return &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:            name,
-			Namespace:       namespace,
-			Labels:          labels,
-			OwnerReferences: ownerRefs,
-			Annotations:     rf.Spec.Sentinel.ServiceAnnotations,
-		},
-		Spec: corev1.ServiceSpec{
-			Selector: selectorLabels,
-			Ports: []corev1.ServicePort{
-				{
-					Name:       "sentinel",
-					Port:       26379,
-					TargetPort: sentinelTargetPort,
-					Protocol:   "TCP",
-				},
-			},
-		},
+func generateService(rf *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference, role string) *corev1.Service {
+	roleTargetDict := map[string]int{
+		masterRoleName:   6379,
+		slaveRoleName:    6379,
+		sentinelRoleName: 26379,
+		metricsRoleName:  9121,
 	}
-}
+	target, ok := roleTargetDict[role]
+	if !ok {
+		target = 6379
+	}
 
-func generateRedisService(rf *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) *corev1.Service {
-	name := GetRedisName(rf)
-	namespace := rf.Namespace
-
-	selectorLabels := generateSelectorLabels(redisRoleName, rf.Name)
-	labels = util.MergeLabels(labels, selectorLabels)
 	defaultAnnotations := map[string]string{
 		"prometheus.io/scrape": "true",
 		"prometheus.io/port":   "http",
 		"prometheus.io/path":   "/metrics",
 	}
-	annotations := util.MergeLabels(defaultAnnotations, rf.Spec.Redis.ServiceAnnotations)
+	roleAnnoDict := map[string]map[string]string{
+		masterRoleName:   rf.Spec.Redis.ServiceAnnotations,
+		slaveRoleName:    rf.Spec.Redis.ServiceAnnotations,
+		sentinelRoleName: rf.Spec.Sentinel.ServiceAnnotations,
+		metricsRoleName:  util.MergeLabels(defaultAnnotations, rf.Spec.Redis.ServiceAnnotations),
+	}
+	anno, ok := roleAnnoDict[role]
+	if !ok {
+		anno = rf.Spec.Redis.ServiceAnnotations
+	}
 
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:            name,
-			Namespace:       namespace,
-			Labels:          labels,
+			Name:            getRedisNameByRole(rf, role),
+			Namespace:       rf.Namespace,
+			Labels:          util.MergeLabels(labels, generateSelectorLabelsByRole(rf.Name, role)),
 			OwnerReferences: ownerRefs,
-			Annotations:     annotations,
+			Annotations:     anno,
 		},
 		Spec: corev1.ServiceSpec{
-			Type:      corev1.ServiceTypeClusterIP,
-			ClusterIP: corev1.ClusterIPNone,
+			Selector: generateSelectorLabelsByRole(rf.Name, role),
 			Ports: []corev1.ServicePort{
 				{
-					Port:     exporterPort,
-					Protocol: corev1.ProtocolTCP,
-					Name:     exporterPortName,
+					Name:       role,
+					Port:       int32(target),
+					TargetPort: intstr.FromInt(target),
+					Protocol:   "TCP",
 				},
 			},
-			Selector: selectorLabels,
 		},
 	}
 }

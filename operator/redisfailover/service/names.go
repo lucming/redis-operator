@@ -37,3 +37,18 @@ func GetSentinelName(rf *redisfailoverv1.RedisFailover) string {
 func generateName(typeName, metaName string) string {
 	return fmt.Sprintf("%s%s-%s", baseName, typeName, metaName)
 }
+
+func getRedisNameByRole(rf *redisfailoverv1.RedisFailover, role string) string {
+	switch role {
+	case masterRoleName:
+		return generateName(redisName, rf.Name+"-master")
+	case slaveRoleName:
+		return generateName(redisName, rf.Name+"-slave")
+	case sentinelRoleName:
+		return generateName(sentinelName, rf.Name)
+	case metricsRoleName:
+		return generateName(redisName, rf.Name)
+	}
+
+	return generateName(redisName, rf.Name+"-master")
+}

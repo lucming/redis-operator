@@ -6,10 +6,19 @@ import (
 	redisfailoverv1 "github.com/spotahome/redis-operator/api/redisfailover/v1"
 )
 
+type serviceRole = string
+
+const (
+	masterRoleName   serviceRole = "master"
+	slaveRoleName    serviceRole = "slave"
+	sentinelRoleName serviceRole = "sentinel"
+	metricsRoleName  serviceRole = "metrics"
+)
+
 // Ensure is called to ensure all of the resources associated with a RedisFailover are created
 func (w *RedisFailoverHandler) Ensure(rf *redisfailoverv1.RedisFailover, labels map[string]string, or []metav1.OwnerReference) error {
 	if rf.Spec.Redis.Exporter.Enabled {
-		if err := w.rfService.EnsureRedisService(rf, labels, or); err != nil {
+		if err := w.rfService.EnsureService(rf, labels, or, metricsRoleName); err != nil {
 			return err
 		}
 	} else {
@@ -20,7 +29,7 @@ func (w *RedisFailoverHandler) Ensure(rf *redisfailoverv1.RedisFailover, labels 
 
 	sentinelsAllowed := rf.SentinelsAllowed()
 	if sentinelsAllowed {
-		if err := w.rfService.EnsureSentinelService(rf, labels, or); err != nil {
+		if err := w.rfService.EnsureService(rf, labels, or, sentinelRoleName); err != nil {
 			return err
 		}
 		if err := w.rfService.EnsureSentinelConfigMap(rf, labels, or); err != nil {
@@ -45,6 +54,13 @@ func (w *RedisFailoverHandler) Ensure(rf *redisfailoverv1.RedisFailover, labels 
 		if err := w.rfService.EnsureSentinelDeployment(rf, labels, or); err != nil {
 			return err
 		}
+	}
+
+	if err := w.rfService.EnsureService(rf, labels, or, masterRoleName); err != nil {
+		return err
+	}
+	if err := w.rfService.EnsureService(rf, labels, or, slaveRoleName); err != nil {
+		return err
 	}
 
 	return nil

@@ -67,6 +67,74 @@ func generateSentinelService(rf *redisfailoverv1.RedisFailover, labels map[strin
 	}
 }
 
+func getTargetPortByRole(role string) int {
+	switch role {
+	case masterRoleName:
+		return 6379
+	case slaveRoleName:
+		return 6379
+	case sentinelRoleName:
+		return 26379
+	case "metrics":
+		return 9121
+	}
+
+	return 6379
+}
+
+func getAnnotationByRole(rf *redisfailoverv1.RedisFailover, role string) map[string]string {
+	switch role {
+	case masterRoleName:
+		return rf.Spec.Redis.ServiceAnnotations
+	case slaveRoleName:
+		return rf.Spec.Redis.ServiceAnnotations
+	case sentinelRoleName:
+		return rf.Spec.Sentinel.ServiceAnnotations
+	case "metrics":
+		defaultAnnotations := map[string]string{
+			"prometheus.io/scrape": "true",
+			"prometheus.io/port":   "http",
+			"prometheus.io/path":   "/metrics",
+		}
+		annotations := util.MergeLabels(defaultAnnotations, rf.Spec.Redis.ServiceAnnotations)
+		return annotations
+	}
+
+	return rf.Spec.Redis.ServiceAnnotations
+}
+
+func generateServiceByRole(rf *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference, role string) *corev1.Service {
+	name := GetRedisNameByRole(rf, role)
+	namespace := rf.Namespace
+
+	port := getTargetPortByRole(role)
+	targetPort := intstr.FromInt(port)
+	selectorLabels := generateSelectorLabelsByRole(rf.Name, role)
+	labels = util.MergeLabels(labels, selectorLabels)
+	anno := getAnnotationByRole(rf, role)
+
+	return &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:            name,
+			Namespace:       namespace,
+			Labels:          labels,
+			OwnerReferences: ownerRefs,
+			Annotations:     anno,
+		},
+		Spec: corev1.ServiceSpec{
+			Selector: selectorLabels,
+			Ports: []corev1.ServicePort{
+				{
+					Name:       role,
+					Port:       int32(port),
+					TargetPort: targetPort,
+					Protocol:   "TCP",
+				},
+			},
+		},
+	}
+}
+
 func generateRedisService(rf *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) *corev1.Service {
 	name := GetRedisName(rf)
 	namespace := rf.Namespace
@@ -96,70 +164,6 @@ func generateRedisService(rf *redisfailoverv1.RedisFailover, labels map[string]s
 					Port:     exporterPort,
 					Protocol: corev1.ProtocolTCP,
 					Name:     exporterPortName,
-				},
-			},
-			Selector: selectorLabels,
-		},
-	}
-}
-
-func generateMasterService(rf *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) *corev1.Service {
-	name := GetRedisName(rf)
-	namespace := rf.Namespace
-	selectorLabels := generateSelectorLabels(redisRoleName, rf.Name)
-	selectorLabels["role"] = "master"
-	labels = util.MergeLabels(labels, selectorLabels)
-	masterTargetPort := intstr.FromInt(6379)
-
-	return &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:            name + "-master",
-			Namespace:       namespace,
-			Labels:          labels,
-			OwnerReferences: ownerRefs,
-			Annotations:     rf.Spec.Redis.PodAnnotations,
-		},
-		Spec: corev1.ServiceSpec{
-			Type:      corev1.ServiceTypeClusterIP,
-			ClusterIP: corev1.ClusterIPNone,
-			Ports: []corev1.ServicePort{
-				{
-					Name:       "master",
-					Port:       6379,
-					TargetPort: masterTargetPort,
-					Protocol:   "TCP",
-				},
-			},
-			Selector: selectorLabels,
-		},
-	}
-}
-
-func generateSlaveService(rf *redisfailoverv1.RedisFailover, labels map[string]string, ownerRefs []metav1.OwnerReference) *corev1.Service {
-	name := GetRedisName(rf)
-	namespace := rf.Namespace
-	selectorLabels := generateSelectorLabels(redisRoleName, rf.Name)
-	selectorLabels["role"] = "slave"
-	labels = util.MergeLabels(labels, selectorLabels)
-	masterTargetPort := intstr.FromInt(6379)
-
-	return &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:            name + "-slave",
-			Namespace:       namespace,
-			Labels:          labels,
-			OwnerReferences: ownerRefs,
-			Annotations:     rf.Spec.Redis.PodAnnotations,
-		},
-		Spec: corev1.ServiceSpec{
-			Type:      corev1.ServiceTypeClusterIP,
-			ClusterIP: corev1.ClusterIPNone,
-			Ports: []corev1.ServicePort{
-				{
-					Name:       "slave",
-					Port:       6379,
-					TargetPort: masterTargetPort,
-					Protocol:   "TCP",
 				},
 			},
 			Selector: selectorLabels,

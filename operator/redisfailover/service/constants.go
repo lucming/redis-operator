@@ -23,6 +23,8 @@ const (
 	baseName               = "rf"
 	bootstrapName          = "b"
 	sentinelName           = "s"
+	masterRoleName         = "master"
+	slaveRoleName          = "slave"
 	sentinelRoleName       = "sentinel"
 	sentinelConfigFileName = "sentinel.conf"
 	redisConfigFileName    = "redis.conf"

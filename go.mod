@@ -1,0 +1,53 @@
+module github.com/spotahome/redis-operator
+
+go 1.16
+
+require (
+	github.com/beorn7/perks v0.0.0-20160804104726-4c0e84591b9a
+	github.com/davecgh/go-spew v1.1.0
+	github.com/evanphx/json-patch v4.5.0+incompatible
+	github.com/go-redis/redis v6.12.0+incompatible
+	github.com/gogo/protobuf v1.0.0
+	github.com/golang/groupcache v0.0.0-20180513044358-24b0969c4cb7
+	github.com/golang/protobuf v1.0.0
+	github.com/google/go-cmp v0.3.1
+	github.com/google/gofuzz v0.0.0-20170612174753-24818f796faf
+	github.com/google/uuid v1.1.1
+	github.com/googleapis/gnostic v0.1.0
+	github.com/hashicorp/golang-lru v0.0.0-20180201235237-0fb14efe8c47
+	github.com/imdario/mergo v0.0.0-20180119215619-163f41321a19
+	github.com/json-iterator/go v0.0.0-20180701071628-ab8a2e0c74be
+	github.com/matttproud/golang_protobuf_extensions v1.0.0
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
+	github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742
+	github.com/opentracing/opentracing-go v1.0.2
+	github.com/pkg/errors v0.8.1
+	github.com/pmezard/go-difflib v1.0.0
+	github.com/prometheus/client_golang v0.9.0-pre1.0.20180629055134-d6a9817c4afc
+	github.com/prometheus/client_model v0.0.0-20171117100541-99fa1f4be8e5
+	github.com/prometheus/common v0.0.0-20180110214958-89604d197083
+	github.com/prometheus/procfs v0.0.0-20180212145926-282c8707aa21
+	github.com/sirupsen/logrus v1.0.5
+	github.com/spf13/pflag v1.0.0
+	github.com/spotahome/kooper v0.8.0
+	github.com/stretchr/objx v0.1.0
+	github.com/stretchr/testify v1.2.2
+	golang.org/x/crypto v0.0.0-20180127211104-1875d0a70c90
+	golang.org/x/net v0.0.0-20180202180947-2fb46b16b8dd
+	golang.org/x/oauth2 v0.0.0-20180207181906-543e37812f10
+	golang.org/x/sync v0.0.0-20171101214715-fd80eb99c8f6
+	golang.org/x/sys v0.0.0-20180202135801-37707fdb30a5
+	golang.org/x/text v0.3.1-0.20171227012246-e19ae1496984
+	golang.org/x/time v0.0.0-20180412165947-fbb02b2291d2
+	google.golang.org/appengine v1.0.0
+	gopkg.in/inf.v0 v0.9.0
+	gopkg.in/yaml.v2 v2.0.0
+	k8s.io/api v0.0.0-20191114100237-2cd11237263f
+	k8s.io/apiextensions-apiserver v0.0.0-20191114105316-e8706470940d
+	k8s.io/apimachinery v0.15.10-beta.0
+	k8s.io/client-go v0.0.0-20191114101336-8cba805ad12d
+	k8s.io/klog v1.0.0
+	k8s.io/kube-openapi v0.0.0-20180201014056-275e2ce91dec
+	k8s.io/utils v0.0.0-20191114200735-6ca3b61696b6
+	sigs.k8s.io/yaml v1.1.0
+)

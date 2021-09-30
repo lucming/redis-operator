@@ -1,7 +1,8 @@
 FROM golang:1.13-alpine
 
-ENV CODEGEN_VERSION="1.11.9"
+ENV CODEGEN_VERSION="1.16.6"
 
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 RUN apk --no-cache add \
     bash \
     git \
@@ -31,6 +32,8 @@ ARG gid=1000
 RUN addgroup -g $gid rf && \
     adduser -D -u $uid -G rf rf && \
     chown rf:rf -R /go
+RUN go env -w GO111MODULE=on
+RUN go env -w GOPROXY=https://goproxy.cn,direct
 
 
 USER rf

@@ -52,7 +52,6 @@ default: build
 .PHONY: docker-build
 docker-build: deps-development
 	docker build \
-		--build-arg uid=$(UID) \
 		-t $(REPOSITORY)-dev:latest \
 		-t $(REPOSITORY)-dev:$(COMMIT) \
 		-f $(DEV_DIR)/Dockerfile \

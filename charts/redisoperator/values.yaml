@@ -1,5 +1,5 @@
 image: googleimages/redis-operator 
-tag: v2 
+tag: v3 
 pullPolicy: Always
 containerName: redisoperator
 podAnnotations: {}

@@ -7,8 +7,7 @@ Redis Operator creates/configures/manages redis-failovers atop Kubernetes.
 
 ## Requirements
 
-Redis Operator is meant to be run on Kubernetes 1.9+.
-All dependencies have been vendored, so there's no need to any additional download.
+Redis Operator is meant to be run on Kubernetes 1.16+.
 
 ### Versions deployed
 
@@ -39,7 +38,8 @@ This will create a deployment named `redisoperator`.
 From the root folder of the project, execute the following:
 
 ```
-helm install --name redisfailover charts/redisoperator
+# helm v3
+helm install redisfailover charts/redisoperator
 ```
 
 ## Usage

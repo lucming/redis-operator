@@ -25,6 +25,7 @@ import (
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	rest "k8s.io/client-go/rest"
+	"context"
 )
 
 // RedisFailoversGetter has a method to return a RedisFailoverInterface.
@@ -68,7 +69,7 @@ func (c *redisFailovers) Get(name string, options meta_v1.GetOptions) (result *v
 		Resource("redisfailovers").
 		Name(name).
 		VersionedParams(&options, scheme.ParameterCodec).
-		Do().
+		Do(context.TODO()).
 		Into(result)
 	return
 }
@@ -80,7 +81,7 @@ func (c *redisFailovers) List(opts meta_v1.ListOptions) (result *v1.RedisFailove
 		Namespace(c.ns).
 		Resource("redisfailovers").
 		VersionedParams(&opts, scheme.ParameterCodec).
-		Do().
+		Do(context.TODO()).
 		Into(result)
 	return
 }
@@ -92,7 +93,7 @@ func (c *redisFailovers) Watch(opts meta_v1.ListOptions) (watch.Interface, error
 		Namespace(c.ns).
 		Resource("redisfailovers").
 		VersionedParams(&opts, scheme.ParameterCodec).
-		Watch()
+		Watch(context.TODO())
 }
 
 // Create takes the representation of a redisFailover and creates it.  Returns the server's representation of the redisFailover, and an error, if there is any.
@@ -102,7 +103,7 @@ func (c *redisFailovers) Create(redisFailover *v1.RedisFailover) (result *v1.Red
 		Namespace(c.ns).
 		Resource("redisfailovers").
 		Body(redisFailover).
-		Do().
+		Do(context.TODO()).
 		Into(result)
 	return
 }
@@ -115,7 +116,7 @@ func (c *redisFailovers) Update(redisFailover *v1.RedisFailover) (result *v1.Red
 		Resource("redisfailovers").
 		Name(redisFailover.Name).
 		Body(redisFailover).
-		Do().
+		Do(context.TODO()).
 		Into(result)
 	return
 }
@@ -127,7 +128,7 @@ func (c *redisFailovers) Delete(name string, options *meta_v1.DeleteOptions) err
 		Resource("redisfailovers").
 		Name(name).
 		Body(options).
-		Do().
+		Do(context.TODO()).
 		Error()
 }
 
@@ -138,7 +139,7 @@ func (c *redisFailovers) DeleteCollection(options *meta_v1.DeleteOptions, listOp
 		Resource("redisfailovers").
 		VersionedParams(&listOptions, scheme.ParameterCodec).
 		Body(options).
-		Do().
+		Do(context.TODO()).
 		Error()
 }
 
@@ -151,7 +152,7 @@ func (c *redisFailovers) Patch(name string, pt types.PatchType, data []byte, sub
 		SubResource(subresources...).
 		Name(name).
 		Body(data).
-		Do().
+		Do(context.TODO()).
 		Into(result)
 	return
 }
